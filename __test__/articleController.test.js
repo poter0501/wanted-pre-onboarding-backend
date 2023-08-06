@@ -263,3 +263,70 @@ describe('articleController.update', () => {
         expect(responseData).toEqual({ message: "Error updating article", error: "Test error" });
     });
 });
+describe('articleController.delete', () => {
+    let req, res;
+    const mockArticleId = 1;
+    const mockUserId = 1;
+
+    beforeEach(() => {
+        req = httpMocks.createRequest({
+            params: { id: mockArticleId },
+            userId: mockUserId
+        });
+        res = httpMocks.createResponse();
+    });
+
+    it('should delete the article and return 200', async () => {
+        const mockArticle = {
+            id: mockArticleId,
+            author: mockUserId,
+            destroy: jest.fn()
+        };
+
+        Article.findByPk.mockResolvedValue(mockArticle);
+
+        await articleController.delete(req, res);
+
+        expect(mockArticle.destroy).toHaveBeenCalled();
+        expect(res.statusCode).toBe(200);
+        const responseData = JSON.parse(res._getData());
+        expect(responseData).toEqual({ message: "Article deleted successfully" });
+    });
+
+    it('should return 404 if the article is not found', async () => {
+        Article.findByPk.mockResolvedValue(null);
+
+        await articleController.delete(req, res);
+
+        expect(res.statusCode).toBe(404);
+        const responseData = JSON.parse(res._getData());
+        expect(responseData).toEqual({ message: "Article not found" });
+    });
+
+    it('should return 403 if user is not the author', async () => {
+        const mockArticle = {
+            id: mockArticleId,
+            author: mockUserId + 1,
+            destroy: jest.fn()
+        };
+
+        Article.findByPk.mockResolvedValue(mockArticle);
+
+        await articleController.delete(req, res);
+
+        expect(res.statusCode).toBe(403);
+        const responseData = JSON.parse(res._getData());
+        expect(responseData).toEqual({ message: "You are not authorized to delete this article" });
+    });
+
+    it('should return 500 if there is an error', async () => {
+        Article.findByPk.mockRejectedValue(new Error('Test error'));
+
+        await articleController.delete(req, res);
+
+        const responseData = JSON.parse(res._getData());
+        expect(res.statusCode).toBe(500);
+        expect(responseData).toEqual({ message: "Error deleting article", error: "Test error" });
+    });
+});
+
