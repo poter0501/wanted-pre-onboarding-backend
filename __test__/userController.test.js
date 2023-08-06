@@ -9,21 +9,22 @@ const sequelize = require('../config/database');
 const app = express();
 app.use(express.json());
 app.post('/user/register', userController.register);
+app.post('/user/login', userController.login);
+
+
+// 데이터베이스 연결
+beforeAll(async () => {
+    await sequelize.authenticate();
+});
+
+// 모든 테스트가 완료된 후 데이터베이스 연결 종료
+afterAll(async () => {
+    await sequelize.close();
+});
 
 describe('User Registration Endpoint', () => {
-    // 데이터베이스 연결
-    beforeAll(async () => {
-        await sequelize.authenticate();
-    });
-
-    // 모든 테스트가 완료된 후 데이터베이스 연결 종료
-    afterAll(async () => {
-        await sequelize.close();
-    });
-
-
     it('should register a user successfully', async () => {
-        const testEmail = 'test@example.com';
+        const testEmail = 'registerTest@example.com';
         const testPassword = 'Password123';
 
         // 회원가입 요청
@@ -66,7 +67,7 @@ describe('User Registration Endpoint', () => {
         expect(response.body.message).toBe('Invalid email format');
     });
     it('should return an error for invalid password format', async () => {
-        const testEmail3 = 'test@example.com';
+        const testEmail3 = 'registerTest@example.com';
         const testPassword3 = '1234';
 
         const response = await request(app)
@@ -78,5 +79,54 @@ describe('User Registration Endpoint', () => {
 
         expect(response.status).toBe(400);
         expect(response.body.message).toBe('Invalid password format');
+    });
+});
+
+describe('User Login Endpoint', () => {
+
+    it('should login successfully with valid credentials', async () => {
+        const testEmailLogin = 'test@example.com';
+        const testPasswordLogin = 'Password123';
+
+        const response = await request(app)
+            .post('/user/login')
+            .send({
+                email: testEmailLogin,
+                password: testPasswordLogin
+            });
+
+        expect(response.status).toBe(200);
+        expect(response.body.message).toBe('Logged in successfully');
+        expect(response.body.token).toBeDefined();
+    });
+
+    it('should fail with invalid email', async () => {
+        const testEmailLogin2 = 'wrong@example.com';
+        const testPasswordLogin2 = 'Password123';
+
+        const response = await request(app)
+            .post('/user/login')
+            .send({
+                email: testEmailLogin2,
+                password: testPasswordLogin2
+            });
+
+        expect(response.status).toBe(401);
+        expect(response.body.message).toBe('Incorrect email or password');
+    });
+
+    it('should fail with invalid password', async () => {
+        const testEmailLogin3 = 'test@example.com';
+        const testPasswordLogin3 = 'wrongPassword';
+
+        const response = await request(app)
+            .post('/user/login')
+            .send({
+                email: testEmailLogin3,
+                password: testPasswordLogin3
+            });
+
+        expect(response.status).toBe(401);
+        expect(response.body.message).toBe('Incorrect email or password');
     });
 });
