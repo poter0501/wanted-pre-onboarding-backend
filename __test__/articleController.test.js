@@ -139,4 +139,53 @@ describe('articleController.list', () => {
         expect(res.statusCode).toBe(500);
         expect(responseData).toEqual(expectedErrorResponse);
     });
-})
+});
+describe('getArticleById', () => {
+    let req, res;
+
+    beforeEach(() => {
+        req = httpMocks.createRequest();
+        res = httpMocks.createResponse();
+    });
+
+    it('should retrieve an article by its ID and return 200', async () => {
+        const mockArticle = {
+            id: 1,
+            author: 'testAuthor',
+            content: 'testContent'
+        };
+        Article.findByPk.mockResolvedValue(mockArticle);
+
+        req.params.id = '1'; // 주어진 게시글 ID 설정
+
+        await articleController.getArticleById(req, res);
+
+        expect(res.statusCode).toBe(200);
+        expect(res._getData()).toEqual(mockArticle);
+    });
+
+    it('should return 404 if the article is not found', async () => {
+        Article.findByPk.mockResolvedValue(null);
+
+        req.params.id = '99';  // 존재하지 않는 게시글 ID 설정
+
+        await articleController.getArticleById(req, res);
+
+        expect(res.statusCode).toBe(404);
+        expect(res._getData()).toEqual({ message: 'Article not found' });
+    });
+
+    it('should return 500 if there is an error', async () => {
+        Article.findByPk.mockRejectedValue(new Error('Test error'));
+
+        req.params.id = '1'; 
+
+        await articleController.getArticleById(req, res);
+
+        const responseData = res._getData();
+        
+        expect(res.statusCode).toBe(500);
+        expect(responseData.message).toBe('Error retrieving article');
+        expect(responseData.error).toBe('Test error');
+    });
+});
