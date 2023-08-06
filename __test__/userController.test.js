@@ -65,4 +65,18 @@ describe('User Registration Endpoint', () => {
         expect(response.status).toBe(400);
         expect(response.body.message).toBe('Invalid email format');
     });
+    it('should return an error for invalid password format', async () => {
+        const testEmail3 = 'test@example.com';
+        const testPassword3 = '1234';
+
+        const response = await request(app)
+            .post('/user/register')
+            .send({
+                email: testEmail3,
+                password: testPassword3
+            });
+
+        expect(response.status).toBe(400);
+        expect(response.body.message).toBe('Invalid password format');
+    });
 });
