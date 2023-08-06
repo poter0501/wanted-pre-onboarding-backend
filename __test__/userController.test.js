@@ -1,5 +1,3 @@
-require('dotenv').config();
-
 const request = require('supertest');
 const express = require('express');
 const userController = require('../controllers/userController');
@@ -10,17 +8,6 @@ const app = express();
 app.use(express.json());
 app.post('/user/register', userController.register);
 app.post('/user/login', userController.login);
-
-
-// 데이터베이스 연결
-beforeAll(async () => {
-    await sequelize.authenticate();
-});
-
-// 모든 테스트가 완료된 후 데이터베이스 연결 종료
-afterAll(async () => {
-    await sequelize.close();
-});
 
 describe('User Registration Endpoint', () => {
     it('should register a user successfully', async () => {

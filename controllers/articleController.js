@@ -16,6 +16,8 @@ exports.post = async (req, res) => {
             content
         });
 
+        console.log(`In post function, newArticle.author => ${newArticle.author}, newArticle.content => ${newArticle.content}`);
+
         // 성공 응답 반환
         res.status(201).json({
             message: "Article created successfully",
