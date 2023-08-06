@@ -2,17 +2,18 @@ require('dotenv').config();
 
 const express = require('express');
 const app = express();
-const userRoute = require('./routes/userRoute')
+const userRoute = require('./routes/userRoute');
+const articleRoute = require('./routes/articleRoute');
 const port = 3000;
 const db = require('./config/database');
-const User = require('./models/user');
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
-app.use(express.json())
-app.use('/user', userRoute)
+app.use(express.json());
+app.use('/user', userRoute);
+app.use('/article', articleRoute);
 
 // DB sync
 // 만약 DB의 스키마가 변경되었다면,
