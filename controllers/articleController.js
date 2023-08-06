@@ -67,3 +67,18 @@ exports.list = async (req, res) => {
         });
     }
 };
+// 게시글 ID로 게시글 조회
+exports.getArticleById = async (req, res) => {
+    try {
+        const id = req.params.id; // 경로 매개변수에서 게시글 ID 가져오기
+        const article = await Article.findByPk(id); // Primary Key를 기반으로 DB에서 게시글 조회
+
+        if (!article) {
+            return res.status(404).send({ message: 'Article not found' });
+        }
+
+        res.status(200).send(article);
+    } catch (error) {
+        res.status(500).send({ message: 'Error retrieving article', error: error.message });
+    }
+};
