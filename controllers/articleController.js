@@ -118,3 +118,31 @@ exports.update = async (req, res) => {
         });
     }
 };
+exports.delete = async (req, res) => {
+    try {
+        const id = req.params.id; // URL에서 게시글 ID를 가져옵니다.
+        const userId = req.userId; // authMiddleware를 통해 설정된 사용자 ID
+
+        // 게시글을 찾습니다.
+        const article = await Article.findByPk(id);
+        if (!article) {
+            return res.status(404).json({ message: "Article not found" });
+        }
+
+        // 인증된 사용자와 게시글의 작성자를 비교합니다.
+        if (article.author.toString() !== userId.toString()) {
+            return res.status(403).json({ message: "You are not authorized to delete this article" });
+        }
+
+        // 게시글을 삭제합니다.
+        await article.destroy();
+
+        res.status(200).json({ message: "Article deleted successfully" });
+    } catch (error) {
+        res.status(500).json({
+            message: "Error deleting article",
+            error: error.message
+        });
+    }
+};
+
