@@ -82,3 +82,39 @@ exports.getArticleById = async (req, res) => {
         res.status(500).send({ message: 'Error retrieving article', error: error.message });
     }
 };
+exports.update = async (req, res) => {
+    try {
+        const id = req.params.id; // URL에서 게시글 ID를 가져옵니다.
+        const userId = req.userId; // authMiddleware 를 통해 설정된 사용자 ID
+        const { content } = req.body; // 수정할 내용을 가져옵니다.
+        console.log(`In update function, content => ${content}`);
+        
+        // 게시글을 찾습니다.
+        const article = await Article.findByPk(id);
+
+        if (!article) {
+            return res.status(404).json({ message: "Article not found" });
+        }
+        console.log(`In update function, article.author => ${article.author}, userId => ${userId}`);
+
+        // 인증된 사용자와 게시글의 작성자를 비교합니다.
+        if (article.author.toString() !== userId.toString()) {
+            return res.status(403).json({ message: "You are not authorized to edit this article" });
+        }
+
+        // 게시글을 수정합니다.
+        article.content = content;
+        await article.save();
+
+        res.status(200).json({
+            message: "Article updated successfully",
+            article
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            message: "Error updating article",
+            error: error.message
+        });
+    }
+};
