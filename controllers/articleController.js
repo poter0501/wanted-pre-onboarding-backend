@@ -31,3 +31,39 @@ exports.post = async (req, res) => {
         });
     }
 };
+exports.list = async (req, res) => {
+    console.log(`In list function, req => ${req}`)
+    try {
+        const page = parseInt(req.query.page) || 1;  // 기본값은 1페이지
+        const limit = parseInt(req.query.limit) || 10; // 기본값은 10개
+
+        // offset 계산
+        const offset = (page - 1) * limit;
+
+        const { count, rows } = await Article.findAndCountAll({
+            limit: limit,
+            offset: offset,
+            order: [['createdAt', 'DESC']] // 최신 게시글부터 반환
+        });
+
+        // 페이지네이션 메타 데이터
+        const totalPages = Math.ceil(count / limit);
+        const pagination = {
+            totalItems: count,
+            itemsPerPage: limit,
+            currentPage: page,
+            totalPages: totalPages
+        };
+
+        res.status(200).json({
+            articles: rows,
+            pagination: pagination
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            message: "Error fetching articles",
+            error: error.message
+        });
+    }
+};
