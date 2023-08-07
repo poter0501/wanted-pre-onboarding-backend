@@ -1,6 +1,14 @@
 ## 지원자 성명
 #### 이도영
 ## 애플리케이션의 실행 방법 (엔드포인트 호출 방법 포함)
+### 환경변수(.env 파일) 형식
+```
+DB_NAME= "..."
+DB_USER= "..."
+DB_PASSWORD= "..."
+DB_HOST= "localhost"
+JWT_SECRET= "..."
+```
 ### 서버 실행 방법
 ```
 npm start
